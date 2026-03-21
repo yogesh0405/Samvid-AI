@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Build outputs
+frontend/dist/
+frontend/.vite/
+.aws-sam/
+samconfig.toml
+
+# Environment files (never commit secrets)
+.env
+.env.local
+.env.*.local
+env.json
+
+# AWS SAM artifacts
+.aws-sam/
+
+# Python cache
+*.egg-info/
+dist/
+build/
+*.egg
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Test artifacts
+.pytest_cache/
+coverage/
+.coverage
+
+# Layer build artifacts (installed packages)
+backend/layers/shared/python/pydantic/
+backend/layers/shared/python/openai/
+backend/layers/shared/python/boto*/
+backend/layers/shared/python/botocore/
+backend/layers/shared/python/httpx/

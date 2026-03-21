@@ -1,0 +1,171 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Samvid AI - Document Results API Response",
+  "description": "Schema for GET /api/v1/documents/{documentId}/results",
+  "type": "object",
+  "required": ["success", "data"],
+  "properties": {
+    "success": { "type": "boolean", "const": true },
+    "data": {
+      "type": "object",
+      "required": ["document_id", "status"],
+      "properties": {
+        "document_id": { "type": "string", "format": "uuid" },
+        "status": {
+          "type": "string",
+          "enum": ["pending","uploading","uploaded","ocr_processing","ocr_complete","analyzing","completed","failed"]
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "file_name": { "type": "string" },
+            "file_size": { "type": "integer" },
+            "mime_type": { "type": "string" },
+            "document_type": { "type": ["string", "null"] },
+            "created_at": { "type": "string", "format": "date-time" },
+            "updated_at": { "type": "string", "format": "date-time" },
+            "error_message": { "type": ["string", "null"] }
+          }
+        },
+        "ocr": {
+          "type": ["object", "null"],
+          "properties": {
+            "word_count": { "type": "integer" },
+            "page_count": { "type": "integer" },
+            "confidence_score": { "type": ["number", "null"] },
+            "processed_at": { "type": "string", "format": "date-time" },
+            "text_preview": { "type": "string" }
+          }
+        },
+        "analysis": {
+          "type": ["object", "null"],
+          "required": ["plain_language_summary", "document_type_detected", "overall_risk_level"],
+          "properties": {
+            "plain_language_summary": { "type": "string" },
+            "document_type_detected": { "type": "string" },
+            "language_detected": { "type": "string" },
+            "overall_risk_level": { "type": "string", "enum": ["low","medium","high","critical"] },
+            "risk_summary": { "type": "string" },
+            "key_points": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["heading", "detail"],
+                "properties": {
+                  "heading": { "type": "string" },
+                  "detail": { "type": "string" },
+                  "important": { "type": "boolean" }
+                }
+              }
+            },
+            "obligations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["party", "obligation"],
+                "properties": {
+                  "party": { "type": "string" },
+                  "obligation": { "type": "string" },
+                  "frequency": { "type": ["string", "null"] },
+                  "amount": { "type": ["string", "null"] }
+                }
+              }
+            },
+            "deadlines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["description", "date_or_period", "priority"],
+                "properties": {
+                  "description": { "type": "string" },
+                  "date_or_period": { "type": "string" },
+                  "consequence": { "type": ["string", "null"] },
+                  "priority": { "type": "string", "enum": ["low","medium","high","critical"] }
+                }
+              }
+            },
+            "penalties": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["trigger", "penalty_description", "risk_level"],
+                "properties": {
+                  "trigger": { "type": "string" },
+                  "penalty_description": { "type": "string" },
+                  "amount_or_severity": { "type": ["string", "null"] },
+                  "risk_level": { "type": "string", "enum": ["low","medium","high","critical"] }
+                }
+              }
+            },
+            "risks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["clause_text", "plain_language_explanation", "risk_level", "recommendation"],
+                "properties": {
+                  "clause_text": { "type": "string" },
+                  "plain_language_explanation": { "type": "string" },
+                  "risk_level": { "type": "string", "enum": ["low","medium","high","critical"] },
+                  "recommendation": { "type": "string" }
+                }
+              }
+            },
+            "actions_to_take": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["action", "priority"],
+                "properties": {
+                  "action": { "type": "string" },
+                  "priority": { "type": "string", "enum": ["low","medium","high","critical"] },
+                  "deadline": { "type": ["string", "null"] },
+                  "note": { "type": ["string", "null"] }
+                }
+              }
+            },
+            "disclaimer": { "type": "string" },
+            "model_used": { "type": "string" },
+            "analyzed_at": { "type": "string", "format": "date-time" }
+          }
+        },
+        "translations": {
+          "type": "object",
+          "description": "Keys are language codes (hi, ta, te, ...)",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "target_language": { "type": "string" },
+              "target_language_name": { "type": "string" },
+              "translated_at": { "type": "string", "format": "date-time" },
+              "translated_content": {
+                "type": "object",
+                "properties": {
+                  "plain_language_summary": { "type": "string" },
+                  "key_points_translated": { "type": "array" },
+                  "obligations_translated": { "type": "array" },
+                  "deadlines_translated": { "type": "array" },
+                  "actions_to_take_translated": { "type": "array" }
+                }
+              }
+            }
+          }
+        },
+        "voice": {
+          "type": "object",
+          "description": "Keys are language codes (hi, en, ...)",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "language_code": { "type": "string" },
+              "language_name": { "type": "string" },
+              "audio_url": { "type": "string", "format": "uri" },
+              "duration_estimate_seconds": { "type": ["integer", "null"] },
+              "voice_id": { "type": "string" },
+              "generated_at": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

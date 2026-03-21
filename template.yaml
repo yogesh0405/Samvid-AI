@@ -1,0 +1,280 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Samvid AI - Intelligent Legal Document Assistant for Indian Citizens
+
+Globals:
+  Function:
+    Runtime: python3.11
+    Timeout: 60
+    MemorySize: 512
+    Environment:
+      Variables:
+        DOCUMENTS_TABLE: !Ref DocumentsTable
+        DOCUMENTS_BUCKET: !Ref DocumentsBucket
+        AUDIO_BUCKET: !Ref AudioBucket
+        OPENAI_SECRET_NAME: !Ref OpenAISecret
+        ENVIRONMENT: !Ref Environment
+        LOG_LEVEL: INFO
+    Layers:
+      - !Ref SharedLayer
+    Tracing: Active
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,DELETE,OPTIONS'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+      AllowOrigin: "'*'"
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, staging, prod]
+  OpenAIApiKey:
+    Type: String
+    NoEcho: true
+
+Resources:
+  OpenAISecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub samvid-ai/${Environment}/openai-api-key
+      SecretString: !Sub '{"api_key": "${OpenAIApiKey}"}'
+
+  DocumentsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub samvid-ai-documents-${Environment}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: AutoDelete24h
+            Status: Enabled
+            ExpirationInDays: 1
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  AudioBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub samvid-ai-audio-${Environment}-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: AutoDelete24h
+            Status: Enabled
+            ExpirationInDays: 1
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ['*']
+            AllowedMethods: [GET]
+            AllowedOrigins: ['*']
+            MaxAge: 3600
+
+  DocumentsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub samvid-ai-documents-${Environment}
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: documentId
+          AttributeType: S
+        - AttributeName: recordType
+          AttributeType: S
+      KeySchema:
+        - AttributeName: documentId
+          KeyType: HASH
+        - AttributeName: recordType
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  SharedLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub samvid-ai-shared-${Environment}
+      ContentUri: backend/shared/
+      CompatibleRuntimes: [python3.11]
+    Metadata:
+      BuildMethod: python3.11
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: SamvidAIPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: [s3:GetObject, s3:PutObject, s3:DeleteObject]
+                Resource:
+                  - !Sub arn:aws:s3:::samvid-ai-documents-${Environment}-${AWS::AccountId}/*
+                  - !Sub arn:aws:s3:::samvid-ai-audio-${Environment}-${AWS::AccountId}/*
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem, dynamodb:Query]
+                Resource: !GetAtt DocumentsTable.Arn
+              - Effect: Allow
+                Action: [textract:DetectDocumentText, textract:AnalyzeDocument]
+                Resource: '*'
+              - Effect: Allow
+                Action: [translate:TranslateText]
+                Resource: '*'
+              - Effect: Allow
+                Action: [polly:SynthesizeSpeech]
+                Resource: '*'
+              - Effect: Allow
+                Action: [secretsmanager:GetSecretValue]
+                Resource: !Ref OpenAISecret
+
+  SamvidAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub samvid-ai-api-${Environment}
+      StageName: !Ref Environment
+      TracingEnabled: true
+
+  UploadFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub samvid-ai-upload-${Environment}
+      CodeUri: backend/services/upload/
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/documents/upload
+            Method: POST
+
+  OcrFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub samvid-ai-ocr-${Environment}
+      CodeUri: backend/services/ocr/
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 120
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/documents/{documentId}/ocr
+            Method: POST
+
+  AnalyzeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub samvid-ai-analyze-${Environment}
+      CodeUri: backend/services/ai_processor/
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 180
+      MemorySize: 1024
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/documents/{documentId}/analyze
+            Method: POST
+
+  TranslateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub samvid-ai-translate-${Environment}
+      CodeUri: backend/services/translation/
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 120
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/documents/{documentId}/translate
+            Method: POST
+
+  VoiceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub samvid-ai-voice-${Environment}
+      CodeUri: backend/services/voice/
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 120
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/documents/{documentId}/voice
+            Method: POST
+
+  ResultsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub samvid-ai-results-${Environment}
+      CodeUri: backend/services/results/
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/documents/{documentId}/results
+            Method: GET
+
+  DeletionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub samvid-ai-delete-${Environment}
+      CodeUri: backend/services/deletion/
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/documents/{documentId}
+            Method: DELETE
+
+Outputs:
+  ApiEndpoint:
+    Value: !Sub https://${SamvidAPI}.execute-api.${AWS::Region}.amazonaws.com/${Environment}
+  DocumentsBucket:
+    Value: !Ref DocumentsBucket
+  AudioBucket:
+    Value: !Ref AudioBucket
+  DocumentsTable:
+    Value: !Ref DocumentsTable

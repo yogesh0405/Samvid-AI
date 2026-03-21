@@ -1,0 +1,138 @@
+"""
+Samvid AI - Custom Exception Classes
+Provides structured error types for consistent API error responses.
+"""
+
+
+class SamvidBaseError(Exception):
+    """Base exception for all Samvid AI errors."""
+    error_code: str = "INTERNAL_ERROR"
+    status_code: int = 500
+
+    def __init__(self, message: str, details=None):
+        super().__init__(message)
+        self.message = message
+        self.details = details
+
+
+class DocumentNotFoundError(SamvidBaseError):
+    error_code = "DOCUMENT_NOT_FOUND"
+    status_code = 404
+
+    def __init__(self, document_id: str):
+        super().__init__(f"Document '{document_id}' not found.")
+
+
+class InvalidFileTypeError(SamvidBaseError):
+    error_code = "INVALID_FILE_TYPE"
+    status_code = 400
+
+    def __init__(self, mime_type: str):
+        super().__init__(
+            f"Unsupported file type '{mime_type}'. Please upload a PDF, JPG, or PNG file."
+        )
+
+
+class FileTooLargeError(SamvidBaseError):
+    error_code = "FILE_TOO_LARGE"
+    status_code = 413
+
+    def __init__(self, size_mb: float):
+        super().__init__(
+            f"File size {size_mb:.1f} MB exceeds the 50 MB limit."
+        )
+
+
+class OcrFailedError(SamvidBaseError):
+    error_code = "OCR_FAILED"
+    status_code = 422
+
+    def __init__(self, reason: str = ""):
+        super().__init__(
+            f"Text extraction failed. {reason}".strip()
+        )
+
+
+class InsufficientTextError(SamvidBaseError):
+    error_code = "INSUFFICIENT_TEXT"
+    status_code = 422
+
+    def __init__(self):
+        super().__init__(
+            "Not enough readable text was found in the document. "
+            "Please ensure the document is not blank or heavily image-based without text."
+        )
+
+
+class AnalysisFailedError(SamvidBaseError):
+    error_code = "ANALYSIS_FAILED"
+    status_code = 500
+
+    def __init__(self, reason: str = ""):
+        super().__init__(
+            f"AI legal analysis failed. {reason}".strip()
+        )
+
+
+class TranslationFailedError(SamvidBaseError):
+    error_code = "TRANSLATION_FAILED"
+    status_code = 500
+
+    def __init__(self, language: str, reason: str = ""):
+        super().__init__(
+            f"Translation to '{language}' failed. {reason}".strip()
+        )
+
+
+class VoiceGenerationError(SamvidBaseError):
+    error_code = "VOICE_GENERATION_FAILED"
+    status_code = 500
+
+    def __init__(self, reason: str = ""):
+        super().__init__(
+            f"Audio generation failed. {reason}".strip()
+        )
+
+
+class InvalidRequestError(SamvidBaseError):
+    error_code = "INVALID_REQUEST"
+    status_code = 400
+
+    def __init__(self, reason: str):
+        super().__init__(reason)
+
+
+class ProcessingStateError(SamvidBaseError):
+    """Raised when an operation is attempted in an invalid processing state."""
+    error_code = "INVALID_PROCESSING_STATE"
+    status_code = 409
+
+    def __init__(self, document_id: str, current_status: str, required_status: str):
+        super().__init__(
+            f"Document '{document_id}' is in status '{current_status}'. "
+            f"Expected status: '{required_status}'."
+        )
+
+
+class AiProviderError(SamvidBaseError):
+    error_code = "AI_PROVIDER_ERROR"
+    status_code = 502
+
+    def __init__(self, provider: str, reason: str = ""):
+        super().__init__(
+            f"AI provider '{provider}' returned an error. {reason}".strip()
+        )
+
+
+class RateLimitError(SamvidBaseError):
+    error_code = "RATE_LIMIT_EXCEEDED"
+    status_code = 429
+
+    def __init__(self, provider: str):
+        super().__init__(
+            f"Rate limit exceeded for provider '{provider}'. Please try again in a few moments."
+        )
+
+# Alias for backward compatibility
+SamvidError = SamvidBaseError
+

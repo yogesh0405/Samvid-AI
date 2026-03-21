@@ -1,0 +1,200 @@
+{
+  "success": true,
+  "data": {
+    "document_id": "550e8400-e29b-41d4-a716-446655440000",
+    "status": "completed",
+    "metadata": {
+      "file_name": "rental_agreement_pune.pdf",
+      "file_size": 204800,
+      "mime_type": "application/pdf",
+      "document_type": "Rental Agreement",
+      "created_at": "2024-03-01T10:00:00.000000",
+      "updated_at": "2024-03-01T10:02:45.000000",
+      "error_message": null
+    },
+    "ocr": {
+      "word_count": 3842,
+      "page_count": 4,
+      "confidence_score": 98.7,
+      "processed_at": "2024-03-01T10:01:10.000000",
+      "text_preview": "RENTAL AGREEMENT This Rental Agreement is entered into on the 1st day of March 2024, between: LANDLORD: Mr. Suresh Patel..."
+    },
+    "analysis": {
+      "plain_language_summary": "This is a rental agreement between you (Ms. Priya Sharma, the tenant) and Mr. Suresh Patel (the landlord) for a flat at Sunshine Apartments, Baner Road, Pune. The agreement is for 11 months starting 1st March 2024, at a monthly rent of Rs. 18,000. You have paid a security deposit of Rs. 54,000 which should be returned when you leave. There are some clauses you should be aware of before signing — particularly the rent revision clause which allows the landlord to increase rent every 6 months.",
+      "document_type_detected": "Residential Rental Agreement",
+      "language_detected": "English",
+      "overall_risk_level": "medium",
+      "risk_summary": "This agreement has 2 clauses that are unfavorable to you as the tenant. The rent revision clause and the deposit forfeiture clause carry the most risk.",
+      "key_points": [
+        {
+          "heading": "Monthly Rent & Due Date",
+          "detail": "You must pay Rs. 18,000 every month by the 5th. If you pay after the 7th, you will be charged Rs. 500 extra for every day of delay.",
+          "important": true
+        },
+        {
+          "heading": "Security Deposit",
+          "detail": "You have paid Rs. 54,000 as security deposit (3 months' rent). This will be returned within 30 days after you vacate, minus any deductions for damage.",
+          "important": true
+        },
+        {
+          "heading": "Agreement Duration",
+          "detail": "This agreement is valid for 11 months — from 1st March 2024 to 31st January 2025. After this, it must be renewed.",
+          "important": false
+        },
+        {
+          "heading": "Rent Can Be Increased",
+          "detail": "The landlord can increase your rent by up to 10% every 6 months. This means your rent could go from Rs. 18,000 to Rs. 19,800 by September 2024.",
+          "important": true
+        },
+        {
+          "heading": "Minor Repairs Are Your Responsibility",
+          "detail": "You must pay for any repairs costing up to Rs. 2,000 per incident. Only bigger repairs are the landlord's responsibility.",
+          "important": false
+        }
+      ],
+      "obligations": [
+        {
+          "party": "You (Tenant)",
+          "obligation": "Pay monthly rent of Rs. 18,000 by the 5th of every month",
+          "frequency": "Monthly",
+          "amount": "Rs. 18,000"
+        },
+        {
+          "party": "You (Tenant)",
+          "obligation": "Pay for minor repairs up to Rs. 2,000 per incident",
+          "frequency": "As needed",
+          "amount": "Up to Rs. 2,000 per incident"
+        },
+        {
+          "party": "Your Landlord",
+          "obligation": "Return security deposit within 30 days of vacating",
+          "frequency": "Once (at end of tenancy)",
+          "amount": "Rs. 54,000 (less any deductions)"
+        }
+      ],
+      "deadlines": [
+        {
+          "description": "Monthly rent payment",
+          "date_or_period": "5th of every month",
+          "consequence": "Rs. 500 per day late fee from the 8th day onwards",
+          "priority": "high"
+        },
+        {
+          "description": "Agreement expiry — renewal or vacating required",
+          "date_or_period": "31st January 2025",
+          "consequence": "Continuing to stay without renewal may make you a monthly tenant with different rights",
+          "priority": "medium"
+        },
+        {
+          "description": "Notice required before vacating",
+          "date_or_period": "30 days before vacating",
+          "consequence": "Security deposit of Rs. 54,000 will be fully forfeited if you leave without 30 days notice",
+          "priority": "critical"
+        }
+      ],
+      "penalties": [
+        {
+          "trigger": "Rent paid after the 7th of the month",
+          "penalty_description": "Daily late payment penalty",
+          "amount_or_severity": "Rs. 500 per day",
+          "risk_level": "medium"
+        },
+        {
+          "trigger": "Vacating without giving 30 days written notice",
+          "penalty_description": "Full security deposit forfeiture",
+          "amount_or_severity": "Rs. 54,000 (complete loss of deposit)",
+          "risk_level": "critical"
+        }
+      ],
+      "risks": [
+        {
+          "clause_text": "Landlord may revise rent by up to 10% every 6 months with 15 days notice",
+          "plain_language_explanation": "This gives the landlord the power to increase your rent twice a year without needing your agreement. Most standard rental agreements keep rent fixed for the entire period. This clause could increase your rent significantly over the 11 months.",
+          "risk_level": "high",
+          "recommendation": "Request the landlord to remove this clause entirely, or limit any rent revision to the time of renewal only (after the 11-month period). If the landlord insists, negotiate to cap the increase at 5% and make it annual, not every 6 months."
+        },
+        {
+          "clause_text": "Security deposit forfeited if tenant vacates without 30 days notice",
+          "plain_language_explanation": "You could lose Rs. 54,000 if you need to leave urgently — for example, if you get a job transfer or a family emergency. This is a standard clause but the amount at risk is large.",
+          "risk_level": "medium",
+          "recommendation": "Ask the landlord to include an exception for genuine emergencies (with documentation). Alternatively, negotiate to reduce the notice period to 15 days."
+        }
+      ],
+      "actions_to_take": [
+        {
+          "action": "Ask the landlord to limit rent revision to once per year at renewal, not every 6 months",
+          "priority": "high",
+          "deadline": "Before signing the agreement",
+          "note": "This is the most important negotiation point. Most landlords will agree if asked politely"
+        },
+        {
+          "action": "Get a written, signed receipt for your security deposit of Rs. 54,000",
+          "priority": "high",
+          "deadline": "On the day of payment",
+          "note": "Without a receipt, you may have difficulty recovering the deposit later"
+        },
+        {
+          "action": "Set up a monthly reminder to pay rent by the 3rd — 2 days before the 5th deadline",
+          "priority": "medium",
+          "deadline": "Before moving in",
+          "note": "This gives you buffer time to avoid the Rs. 500/day late fee"
+        },
+        {
+          "action": "Take photos and video of the entire flat before moving in",
+          "priority": "medium",
+          "deadline": "On the day of possession",
+          "note": "Send these photos to the landlord by WhatsApp or email. This protects you from deposit deductions for pre-existing damage"
+        },
+        {
+          "action": "Register this rental agreement at the local Sub-Registrar's office",
+          "priority": "medium",
+          "deadline": "Within 4 months of signing",
+          "note": "Registration costs approximately Rs. 1,000 but gives you legal protection under the Registration Act 1908. Unregistered agreements have limited enforceability"
+        }
+      ],
+      "disclaimer": "This analysis is generated by AI for informational purposes only. It is not a substitute for professional legal advice. Please consult a qualified lawyer for decisions related to this document.",
+      "model_used": "gpt-4o",
+      "analyzed_at": "2024-03-01T10:02:30.000000",
+      "prompt_tokens": 2847,
+      "completion_tokens": 1203
+    },
+    "translations": {
+      "hi": {
+        "target_language": "hi",
+        "target_language_name": "Hindi",
+        "translated_at": "2024-03-01T10:05:00.000000",
+        "translation_engine": "AWS_TRANSLATE",
+        "translated_content": {
+          "plain_language_summary": "यह आपके (सुश्री प्रिया शर्मा, किरायेदार) और श्री सुरेश पटेल (मकान मालिक) के बीच पुणे के सनशाइन अपार्टमेंट में एक फ्लैट के लिए किराया समझौता है। यह समझौता 11 महीने के लिए है जो 1 मार्च 2024 से शुरू होता है, मासिक किराया 18,000 रुपये है।",
+          "key_points_translated": [
+            {
+              "heading": "मासिक किराया और नियत तारीख",
+              "detail": "आपको हर महीने की 5 तारीख तक 18,000 रुपये चुकाने होंगे। 7 तारीख के बाद भुगतान पर प्रतिदिन 500 रुपये का जुर्माना लगेगा।",
+              "important": true
+            }
+          ],
+          "obligations_translated": [],
+          "deadlines_translated": [],
+          "actions_to_take_translated": [
+            {
+              "action": "समझौते पर हस्ताक्षर करने से पहले मकान मालिक से किराया संशोधन को 6 महीने की बजाय सालाना सीमित करने के लिए कहें",
+              "priority": "high",
+              "deadline": "हस्ताक्षर से पहले",
+              "note": "यह सबसे महत्वपूर्ण बातचीत का बिंदु है"
+            }
+          ]
+        }
+      }
+    },
+    "voice": {
+      "hi": {
+        "language_code": "hi",
+        "language_name": "Hindi",
+        "audio_url": "https://samvid-ai-audio-dev-123456789.s3.ap-south-1.amazonaws.com/audio/550e8400.../hi/explanation.mp3?X-Amz-Signature=...",
+        "duration_estimate_seconds": 145,
+        "voice_id": "Aditi",
+        "generated_at": "2024-03-01T10:06:30.000000"
+      }
+    }
+  }
+}
