@@ -20,7 +20,7 @@ Globals:
     Tracing: Active
   Api:
     Cors:
-      AllowMethods: "'GET,POST,DELETE,OPTIONS'"
+      AllowMethods: "'GET,POST,PATCH,DELETE,OPTIONS'"
       AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
       AllowOrigin: "'*'"
 
@@ -109,7 +109,7 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: !Sub samvid-ai-shared-${Environment}
-      ContentUri: backend/shared/
+      ContentUri: backend/layers/shared/
       CompatibleRuntimes: [python3.11]
     Metadata:
       BuildMethod: python3.11
@@ -268,6 +268,101 @@ Resources:
             RestApiId: !Ref SamvidAPI
             Path: /api/v1/documents/{documentId}
             Method: DELETE
+
+
+  ChatFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub samvid-ai-chat-${Environment}
+      CodeUri: backend/services/chat/
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 60
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/documents/{documentId}/chat
+            Method: POST
+
+  ChecklistFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub samvid-ai-checklist-${Environment}
+      CodeUri: backend/services/checklist/
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 60
+      Events:
+        Generate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/documents/{documentId}/checklist/generate
+            Method: POST
+        Get:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/documents/{documentId}/checklist
+            Method: GET
+        Update:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/documents/{documentId}/checklist/{itemId}
+            Method: PATCH
+
+  DictionaryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub samvid-ai-dictionary-${Environment}
+      CodeUri: backend/services/dictionary/
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 60
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/documents/{documentId}/dictionary
+            Method: GET
+
+  ReportFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub samvid-ai-report-${Environment}
+      CodeUri: backend/services/report/
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 60
+      Events:
+        Generate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/documents/{documentId}/report/generate
+            Method: POST
+        Get:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/documents/{documentId}/report
+            Method: GET
+        Share:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/documents/{documentId}/report/share
+            Method: POST
+        SharedView:
+          Type: Api
+          Properties:
+            RestApiId: !Ref SamvidAPI
+            Path: /api/v1/reports/shared/{shareToken}
+            Method: GET
 
 Outputs:
   ApiEndpoint:

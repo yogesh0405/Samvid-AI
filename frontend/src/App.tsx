@@ -2,7 +2,7 @@
  * Samvid AI - Root Application Component
  * Orchestrates the full document analysis workflow.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UploadArea from './components/Upload/UploadArea';
 import AnalysisDashboard from './components/Results/AnalysisDashboard';
 import TranslationPanel from './components/Translation/TranslationPanel';
@@ -10,6 +10,15 @@ import VoicePanel from './components/Voice/VoicePanel';
 import ProcessingStepper from './components/Layout/ProcessingStepper';
 import { useDocumentPipeline, useTranslation, useVoice, useDocumentDelete } from './hooks';
 import { LanguageCode } from './types';
+import FloatingChat from './components/Chat/FloatingChat';
+import ToolsPage from './pages/ToolsPage';
+import CourtDateTracker from './pages/CourtDateTracker';
+import IPCSectionExplainer from './pages/IPCSectionExplainer';
+import LegalDocGenerator from './pages/LegalDocGenerator';
+import LawyerFinder from './pages/LawyerFinder';
+import FeaturesHub from './components/Features/FeaturesHub';
+import DocumentComparison from './pages/DocumentComparison';
+import SharedReport from './pages/SharedReport';
 
 export default function App() {
   const { state: pipeline, processDocument, reset } = useDocumentPipeline();
@@ -19,6 +28,18 @@ export default function App() {
     useVoice(pipeline.documentId);
   const { deleteDoc, isDeleting } = useDocumentDelete();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showTools, setShowTools] = useState(false);
+  const [activePage, setActivePage] = useState<string | null>(null);
+  const [sharedReportToken, setSharedReportToken] = useState<string | null>(null);
+
+  // Check for shared report link on mount
+  useEffect(() => {
+    const path = window.location.pathname;
+    const match = path.match(/\/shared\/([a-f0-9]+)/);
+    if (match && match[1]) {
+      setSharedReportToken(match[1]);
+    }
+  }, []);
 
   const handleDelete = async () => {
     if (pipeline.documentId) {
@@ -40,7 +61,12 @@ export default function App() {
       background: '#f8f6ff',
       fontFamily: "'Inter', 'Segoe UI', sans-serif",
     }}>
-      {/* ── Header ── */}
+      {/* ── Shared Report Page (standalone) ── */}
+      {sharedReportToken && <SharedReport shareToken={sharedReportToken} />}
+
+      {/* ── Main App Content ── */}
+      {!sharedReportToken && (
+        <>
       <header style={{
         background: 'white',
         borderBottom: '1px solid #ede9fe',
@@ -56,38 +82,39 @@ export default function App() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          height: '64px',
+          height: '96px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '18px',
-            }}>
-              ⚖️
-            </div>
+            <img
+              src="/logo.png"
+              alt="Samvid AI"
+              style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }}
+            />
             <div>
               <div style={{
                 fontFamily: "'Sora', sans-serif",
-                fontWeight: 800,
-                fontSize: '20px',
-                color: '#3b0764',
-                lineHeight: 1,
+              fontWeight: 800,
+              fontSize: '38px',
+              color: '#3b0764',
+              lineHeight: 1,
               }}>
                 Samvid AI
               </div>
-              <div style={{ fontSize: '11px', color: '#9ca3af', letterSpacing: '0.05em' }}>
+              <div style={{ fontSize: '15px', color: '#9ca3af', letterSpacing: '0.05em' }}>
                 LEGAL DOCUMENT ASSISTANT
               </div>
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {isComplete && (
+              <button
+                onClick={() => setActivePage('tools')}
+                style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #ddd6fe', background: '#7c3aed', color: 'white', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+              >
+                🛠️ Tools
+              </button>
+            )}
             {isComplete && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
@@ -275,8 +302,25 @@ export default function App() {
           </section>
         )}
 
+        {/* ── Tools Page ── */}
+        {isComplete && showTools && (
+          <ToolsPage
+            documentId={pipeline.documentId || ''}
+            documentName={pipeline.results?.metadata?.file_name}
+            onBack={() => setActivePage(null)}
+          />
+        )}
+
+        {isComplete && pipeline.documentId && activePage === 'court' && <CourtDateTracker documentId={pipeline.documentId} onBack={() => setActivePage(null)} />}
+        {isComplete && pipeline.documentId && activePage === 'ipc' && <IPCSectionExplainer documentId={pipeline.documentId} onBack={() => setActivePage(null)} />}
+        {isComplete && pipeline.documentId && activePage === 'docgen' && <LegalDocGenerator documentId={pipeline.documentId} onBack={() => setActivePage(null)} />}
+        {isComplete && pipeline.documentId && activePage === 'lawyer' && <LawyerFinder documentId={pipeline.documentId} onBack={() => setActivePage(null)} />}
+        {isComplete && pipeline.documentId && activePage === 'compare' && <DocumentComparison documentId={pipeline.documentId} onBack={() => setActivePage(null)} />}
+        {isComplete && pipeline.documentId && activePage === 'tools' && <ToolsPage documentId={pipeline.documentId} documentName={pipeline.results?.metadata?.file_name} onBack={() => setActivePage(null)} />}
+
         {/* ── Results layout ── */}
-        {isComplete && pipeline.results && (
+        {isComplete && pipeline.results && !activePage && (
+          <>
           <div>
             {/* Success banner */}
             <div style={{
@@ -344,6 +388,43 @@ export default function App() {
               </div>
             </div>
           </div>
+          <button
+            onClick={() => setActivePage('tools')}
+            style={{
+              position: "fixed",
+              bottom: "92px",
+              right: "24px",
+              width: "56px",
+              height: "56px",
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #f97316, #ea580c)",
+              color: "white",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "22px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 20px rgba(249,115,22,0.4)",
+              zIndex: 999,
+              transition: "all 0.2s ease",
+            }}
+            title="Open Tools"
+          >
+            🛠️
+          </button>
+          <FeaturesHub
+            documentId={pipeline.documentId || ''}
+            documentType={pipeline.results?.analysis?.document_type_detected}
+            onOpenTools={() => setActivePage('tools')}
+            onOpenCourtTracker={() => setActivePage('court')}
+            onOpenIPC={() => setActivePage('ipc')}
+            onOpenDocGen={() => setActivePage('docgen')}
+            onOpenLawyerFinder={() => setActivePage('lawyer')}
+            onOpenComparison={() => setActivePage('compare')}
+          />
+          <FloatingChat documentId={pipeline.documentId || ''} />
+          </>
         )}
 
         {/* ── How it works (idle only) ── */}
@@ -480,6 +561,8 @@ export default function App() {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
 
       <style>{`

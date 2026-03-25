@@ -17,13 +17,27 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api
 const apiClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 30_000,
+  timeout: 15_000,  // Reduced from 30s for faster feedback
 });
 
 // Response interceptor for consistent error handling
+apiClient.interceptors.request.use(
+  (config) => {
+    console.log(`[API] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response: AxiosResponse) => {
+    console.log(`[API] ✓ ${response.status} ${response.config.url}`);
+    return response;
+  },
   (error) => {
+    const url = error.config?.url || 'unknown';
+    const status = error.response?.status || 'timeout';
+    console.error(`[API] ✗ ${status} ${url}`, error.message);
     if (error.response?.data) {
       return Promise.reject(error.response.data);
     }
