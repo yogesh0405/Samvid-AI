@@ -1,25 +1,28 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  base: "/Samvid-AI/",   // 🔥 required for GitHub Pages
+  base: "/Samvid-AI/",
+
   plugins: [react()],
+
   server: {
     port: 3000,
     proxy: {
-      '/api': {
-        target: process.env.VITE_API_BASE_URL || 'http://localhost:3001',
+      "/api": {
+        target: process.env.VITE_API_BASE_URL ?? "http://localhost:3001",
         changeOrigin: true,
       },
     },
   },
+
   build: {
-    outDir: 'dist',
+    outDir: "dist",
     sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'axios'],
+          vendor: ["react", "react-dom", "axios"],
         },
       },
     },
