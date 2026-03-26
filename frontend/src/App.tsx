@@ -86,7 +86,7 @@ export default function App() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <img
-              src="/logo.png"
+              src={`${import.meta.env.BASE_URL}logo.png`}
               alt="Samvid AI"
               style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }}
             />
