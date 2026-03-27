@@ -82,7 +82,7 @@ export default function CourtDateTracker({ documentId, onBack }: CourtDateTracke
   return (
     <div style={{ minHeight: "100vh", background: "#f8fafc" }}>
       {/* Header */}
-      <div style={{ background: "white", borderBottom: "1px solid #f3f4f6", padding: "0 24px", position: "sticky", top: 0, zIndex: 100 }}>
+      <div style={{ background: "white", borderBottom: "1px solid #f3f4f6", padding: "0 24px", position: "sticky", top: 96, zIndex: 100 }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", display: "flex", alignItems: "center", gap: "16px", height: "64px" }}>
           <button onClick={onBack} style={{ background: "none", border: "none", color: "#6b7280", cursor: "pointer", fontSize: "14px", fontWeight: 600, display: "flex", alignItems: "center", gap: "6px" }}>
             ← Back
