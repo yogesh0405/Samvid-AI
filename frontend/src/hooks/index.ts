@@ -1,7 +1,7 @@
 /**
  * Samvid AI - Custom Hooks
  */
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   runFullPipeline,
   translateDocument,
@@ -167,6 +167,11 @@ export function useVoice(documentId: string | null) {
   const [error, setError] = useState<string | null>(null);
   const [voiceRecord, setVoiceRecord] = useState<VoiceRecord | null>(null);
   const cache = useRef<Record<string, VoiceRecord>>({});
+  useEffect(() => {
+    setVoiceRecord(null);
+    setError(null);
+    cache.current = {};
+  }, [documentId]);
 
   const generateAudio = useCallback(
     async (languageCode: LanguageCode) => {
