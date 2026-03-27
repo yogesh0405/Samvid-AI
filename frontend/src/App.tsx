@@ -347,7 +347,7 @@ export default function App() {
                 <div style={{ opacity: 0.8, fontSize: '14px' }}>
                   {pipeline.results.metadata?.file_name} ·{' '}
                   {pipeline.results.analysis?.document_type_detected} ·{' '}
-                  Powered by {pipeline.results.analysis?.model_used}
+                 
                 </div>
               </div>
             </div>
