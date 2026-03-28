@@ -30,7 +30,8 @@ export function formatFileSize(bytes: number): string {
 export function formatDate(isoString: string): string {
   try {
     return new Intl.DateTimeFormat('en-IN', {
-      timeZone: 'Asia/Kolkata', day: 'numeric',
+      timeZone: 'Asia/Kolkata',
+      day: 'numeric',
       month: 'short',
       year: 'numeric',
       hour: '2-digit',
