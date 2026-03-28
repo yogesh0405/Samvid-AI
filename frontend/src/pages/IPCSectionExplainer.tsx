@@ -45,13 +45,12 @@ const SEVERITY_STYLE: Record<string, { bg: string; text: string; border: string;
 };
 
 function extractSections(text: string): string[] {
-  const patterns = [
-    /[Ss]ection[s]?\s+(\d+[-A-Za-z]*(?:\s*,\s*\d+[-A-Za-z]*)*(?:\s*and\s*\d+[-A-Za-z]*)*)/g,
+const patterns = [
+    /[Ss]ections?\s+(\d+[-A-Za-z]*(?:\s*,\s*\d+[-A-Za-z]*)*(?:\s*and\s*\d+[-A-Za-z]*)*)/g,
     /[Ii][Pp][Cc]\s+(\d+[-A-Za-z]*)/g,
     /[Cc]r[Pp][Cc]\s+(\d+[-A-Za-z]*)/g,
-    /[Uu]/s,
     /u\/s\s+(\d+[-A-Za-z]*)/g,
-    /(?:under|u\/s|U\/S)\s+(?:[Ss]ection[s]?\s+)?(\d+[-A-Za-z]*(?:\s*,\s*\d+[-A-Za-z]*)*)/g,
+    /(?:under|u\/s|U\/S)\s+(?:[Ss]ections?\s+)?(\d+[-A-Za-z]*(?:\s*,\s*\d+[-A-Za-z]*)*)/g,
   ];
 
   const found = new Set<string>();
