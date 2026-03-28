@@ -31,7 +31,6 @@ export default function SharedReport({ shareToken }: SharedReportProps) {
         } else {
           setError('❌ Failed to load report. Please try again.');
         }
-        console.error('Error loading shared report:', err);
       } finally {
         setLoading(false);
       }

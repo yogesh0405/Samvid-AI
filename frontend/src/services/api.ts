@@ -23,7 +23,6 @@ const apiClient: AxiosInstance = axios.create({
 // Response interceptor for consistent error handling
 apiClient.interceptors.request.use(
   (config) => {
-    console.log(`[API] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
     return config;
   },
   (error) => Promise.reject(error)
@@ -31,13 +30,11 @@ apiClient.interceptors.request.use(
 
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    console.log(`[API] ✓ ${response.status} ${response.config.url}`);
     return response;
   },
   (error) => {
     const url = error.config?.url || 'unknown';
     const status = error.response?.status || 'timeout';
-    console.error(`[API] ✗ ${status} ${url}`, error.message);
     if (error.response?.data) {
       return Promise.reject(error.response.data);
     }
