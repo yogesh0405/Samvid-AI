@@ -29,7 +29,8 @@ export function formatFileSize(bytes: number): string {
 
 export function formatDate(isoString: string): string {
   try {
-    const date = new Date(isoString);
+    // Backend returns local time with no timezone — just format it directly
+    const date = new Date(isoString + 'Z'); // treat as UTC
     const ist = new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
     const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const day = ist.getUTCDate();
