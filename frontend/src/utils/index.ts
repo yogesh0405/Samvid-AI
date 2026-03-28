@@ -29,14 +29,17 @@ export function formatFileSize(bytes: number): string {
 
 export function formatDate(isoString: string): string {
   try {
-    return new Intl.DateTimeFormat('en-IN', {
-      timeZone: 'Asia/Kolkata',
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(isoString));
+    const date = new Date(isoString);
+    const ist = new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const day = ist.getUTCDate();
+    const month = months[ist.getUTCMonth()];
+    const year = ist.getUTCFullYear();
+    let hours = ist.getUTCHours();
+    const minutes = ist.getUTCMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    return `${day} ${month} ${year} at ${hours}:${minutes} ${ampm}`;
   } catch {
     return isoString;
   }
