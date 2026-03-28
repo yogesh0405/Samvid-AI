@@ -106,7 +106,7 @@ export default function LawyerFinder({ documentId, onBack }: LawyerFinderProps) 
 
   return (
     <div style={{ minHeight: "100vh", background: "#f8fafc" }}>
-      <div style={{ background: "white", borderBottom: "1px solid #f3f4f6", padding: "0 24px", position: "sticky", top: 0, zIndex: 100 }}>
+      <div style={{ background: "white", borderBottom: "1px solid #f3f4f6", padding: "0 24px", position: "sticky", top: 96, zIndex: 100 }}>
         <div style={{ maxWidth: "900px", margin: "0 auto", display: "flex", alignItems: "center", gap: "16px", height: "64px" }}>
           <button onClick={onBack} style={{ background: "none", border: "none", color: "#6b7280", cursor: "pointer", fontSize: "14px", fontWeight: 600 }}>← Back</button>
           <div style={{ width: "1px", height: "20px", background: "#f3f4f6" }} />
@@ -153,9 +153,20 @@ export default function LawyerFinder({ documentId, onBack }: LawyerFinderProps) 
                   </select>
                 </div>
               </div>
-              <button onClick={search} style={{ width: "100%", background: "linear-gradient(135deg, #0f766e, #14b8a6)", color: "white", border: "none", borderRadius: "12px", padding: "14px", fontSize: "15px", fontWeight: 700, cursor: "pointer" }}>
-                🔍 Search Lawyers
-              </button>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <button onClick={search} style={{ width: "100%", background: "linear-gradient(135deg, #0f766e, #14b8a6)", color: "white", border: "none", borderRadius: "12px", padding: "14px", fontSize: "15px", fontWeight: 700, cursor: "pointer" }}>
+                  🔍 Search Lawyers
+                </button>
+                <a
+                  href={`https://www.google.com/search?q=${encodeURIComponent(`${selectedArea || areas[0]} lawyer ${selectedCity || 'India'} verified`)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ width: "100%", background: "white", color: "#374151", border: "1px solid #e5e7eb", borderRadius: "12px", padding: "14px", fontSize: "15px", fontWeight: 700, cursor: "pointer", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", boxSizing: "border-box" }}
+                >
+                  <img src="https://www.google.com/favicon.ico" width="16" height="16" alt="Google" />
+                  Search on Google
+                </a>
+              </div>
             </div>
 
             {searched && (
