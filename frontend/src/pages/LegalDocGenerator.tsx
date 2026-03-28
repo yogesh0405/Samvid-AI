@@ -47,6 +47,18 @@ const TEMPLATES = [
   },
 ];
 
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*\*(.+?)\*\*\*/g, '$1')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/#{1,6}\s+/gm, '')
+    .replace(/^\s*[-*]\s+/gm, '• ')
+    .replace(/`{1,3}([^`]*)`{1,3}/g, '$1')
+    .replace(/_{1,2}(.+?)_{1,2}/g, '$1')
+    .trim();
+}
+
 export default function LegalDocGenerator({ documentId, onBack }: LegalDocGeneratorProps) {
   const [analysis, setAnalysis] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -55,6 +67,7 @@ export default function LegalDocGenerator({ documentId, onBack }: LegalDocGenera
   const [generatedDoc, setGeneratedDoc] = useState("");
   const [userName, setUserName] = useState("");
   const [userAddress, setUserAddress] = useState("");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     axios.get(`${BASE_URL}/documents/${documentId}/results`)
@@ -69,7 +82,6 @@ export default function LegalDocGenerator({ documentId, onBack }: LegalDocGenera
     setGenerating(true);
     setGeneratedDoc("");
 
-    const template = TEMPLATES.find(t => t.id === templateId);
     const prompt = buildPrompt(templateId, analysis, userName, userAddress);
 
     try {
@@ -78,7 +90,8 @@ export default function LegalDocGenerator({ documentId, onBack }: LegalDocGenera
         sessionId: "doc-gen-" + templateId,
         history: [],
       });
-      setGeneratedDoc(res.data.data?.answer || "");
+      const raw = res.data.data?.answer || "";
+      setGeneratedDoc(stripMarkdown(raw));
     } catch {
       setGeneratedDoc("Failed to generate document. Please try again.");
     } finally {
@@ -91,22 +104,24 @@ export default function LegalDocGenerator({ documentId, onBack }: LegalDocGenera
     const summary = analysis?.plain_language_summary || "";
     const risks = (analysis?.risks || []).map((r: any) => r.clauseText || r.clause_text).join(", ");
 
+    const PLAIN_TEXT_INSTRUCTION = `IMPORTANT: Write in plain text only. Do NOT use asterisks, markdown, bold formatting, hashtags, or any special characters for formatting. Use only plain English with proper line breaks and spacing. Write as if typing a formal letter on a typewriter.\n\n`;
+
     const templates: Record<string, string> = {
-      bail_application: `Generate a formal bail application in India for the following case. Write it as a complete, ready-to-use document in plain English that a lawyer can review.
+      bail_application: `${PLAIN_TEXT_INSTRUCTION}Generate a formal bail application in India for the following case. Write it as a complete, ready-to-use document in plain English that a lawyer can review.
 Document type: ${docType}
 Case summary: ${summary}
 Applicant name: ${name || "[APPLICANT NAME]"}
 Address: ${address || "[ADDRESS]"}
 Include: court address, prayer for bail, grounds for bail (first time offender, cooperation with investigation, roots in society, no flight risk), verification statement.`,
 
-      reply_notice: `Generate a formal reply notice/letter in response to this legal document. Write as a complete ready-to-use letter.
+      reply_notice: `${PLAIN_TEXT_INSTRUCTION}Generate a formal reply notice/letter in response to this legal document. Write as a complete ready-to-use letter.
 Document type: ${docType}
 Summary: ${summary}
 Sender name: ${name || "[YOUR NAME]"}
 Address: ${address || "[YOUR ADDRESS]"}
 Include: acknowledgment of receipt, denial of allegations, request for evidence, warning of legal action if harassment continues, professional closing.`,
 
-      objection_letter: `Generate a formal objection letter highlighting unfair clauses in this document. Write as a complete ready-to-use letter.
+      objection_letter: `${PLAIN_TEXT_INSTRUCTION}Generate a formal objection letter highlighting unfair clauses in this document. Write as a complete ready-to-use letter.
 Document type: ${docType}
 Summary: ${summary}
 Problematic clauses: ${risks}
@@ -114,7 +129,7 @@ Your name: ${name || "[YOUR NAME]"}
 Address: ${address || "[YOUR ADDRESS]"}
 Include: specific objections to each unfair clause, proposed amendments, deadline for response, legal consequences of non-response.`,
 
-      legal_complaint: `Generate a formal complaint letter to the appropriate authority regarding this legal matter. Write as a complete ready-to-use document.
+      legal_complaint: `${PLAIN_TEXT_INSTRUCTION}Generate a formal complaint letter to the appropriate authority regarding this legal matter. Write as a complete ready-to-use document.
 Document type: ${docType}
 Summary: ${summary}
 Complainant: ${name || "[YOUR NAME]"}
@@ -136,7 +151,8 @@ Include: facts of the matter, specific grievances, relief sought, supporting doc
 
   const copyDoc = async () => {
     await navigator.clipboard.writeText(generatedDoc);
-    alert("Copied to clipboard!");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -201,11 +217,16 @@ Include: facts of the matter, specific grievances, relief sought, supporting doc
                 {TEMPLATES.find(t => t.id === selectedTemplate)?.icon} Generated Document
               </div>
               <div style={{ display: "flex", gap: "8px" }}>
-                <button onClick={copyDoc} style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "8px 14px", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>📋 Copy</button>
+                <button
+                  onClick={copyDoc}
+                  style={{ background: copied ? "#22c55e" : "#f9fafb", color: copied ? "white" : "#374151", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "8px 14px", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}
+                >
+                  {copied ? "✓ Copied" : "📋 Copy"}
+                </button>
                 <button onClick={downloadDoc} style={{ background: "#7c3aed", color: "white", border: "none", borderRadius: "8px", padding: "8px 14px", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>⬇️ Download</button>
               </div>
             </div>
-            <div style={{ padding: "24px", fontFamily: "monospace", fontSize: "13px", lineHeight: 1.8, color: "#374151", whiteSpace: "pre-wrap", maxHeight: "500px", overflowY: "auto", background: "#fafafa" }}>
+            <div style={{ padding: "24px", fontFamily: "'Courier New', Courier, monospace", fontSize: "13px", lineHeight: 2, color: "#1f2937", whiteSpace: "pre-wrap", maxHeight: "600px", overflowY: "auto", background: "#fafafa" }}>
               {generatedDoc}
             </div>
             <div style={{ padding: "16px 24px", background: "#fff7ed", borderTop: "1px solid #fed7aa" }}>
